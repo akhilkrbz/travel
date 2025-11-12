@@ -19,4 +19,7 @@ router.post('/verify_otp', userController.verifyOtp);
 //User details
 router.get('/details', verifyToken, userController.getUserDetails);
 
+//Logout
+router.post('/logout', verifyToken, userController.logout);
+
 module.exports = router;

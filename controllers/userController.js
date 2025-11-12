@@ -80,5 +80,20 @@ function getUserDetails (req, res) {
     }
 }
 
+//logout
+function logout (req, res) {
+    try {
+        // Invalidate token logic can be implemented here if token blacklisting is used
+        res.status(200).json({
+            message: 'User logged out successfully.'
+        });
+        
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error with logout user.'
+        });
+    }
+}
 
-module.exports = { sendOtp, verifyOtp, getUserDetails };
+
+module.exports = { sendOtp, verifyOtp, getUserDetails, logout };
