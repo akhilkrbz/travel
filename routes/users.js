@@ -3,6 +3,7 @@ var router = express.Router();
 const userController = require('../controllers/userController');
 const { sendOTPValidator } = require('../validators/userValidator');
 const { validate } = require('../middlewares/validationMiddleware');
+const { verifyToken} = require('../middlewares/authMiddleware');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -14,5 +15,8 @@ router.post('/sent_otp', sendOTPValidator, validate, userController.sendOtp);
 
 //OTP Verify
 router.post('/verify_otp', userController.verifyOtp);
+
+//User details
+router.get('/details', verifyToken, userController.getUserDetails);
 
 module.exports = router;

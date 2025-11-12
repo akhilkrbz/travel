@@ -1,4 +1,5 @@
 const User = require('../models').User;
+const jwt = require('jsonwebtoken');
 
 //SEND OTP to Mobile Number
 function sendOtp (req, res) {
@@ -30,17 +31,27 @@ async function verifyOtp (req, res) {
             console.log("check_user", check_user);
 
             if(!check_user) {
-                return res.status(200).json({
-                    message: "User does not exist. Please register.",
+                res.status(200).json({
+                    message: "OTP Verified successfully. Please register.",
                     mobile_no: mobile_no
                 });
             } else {
                 console.log("User already exist.");
-            }
 
-            res.status(200).json({
-                message: "OTP Verified successfully."
-            });
+                //Create JWT Token
+                const token = jwt.sign({
+                    id          : check_user.id,
+                    mobile_no   : check_user.mobile_no,
+                    email       : check_user.email,
+                    name        : check_user.name
+                },
+                process.env.JWT_SECRET, { expiresIn: '1h' });
+
+                res.status(200).json({
+                    message: "OTP Verified successfully.",
+                    token: token    
+                });
+            }
         } else {
             res.status(400).json({
                 message: "Invalid OTP."
@@ -48,7 +59,7 @@ async function verifyOtp (req, res) {
         }
     } catch (error) {
         res.status(500).json({
-            message: 'Error sending OTP'
+            message: 'Error sending OTP.'
         });
     }
 
@@ -56,4 +67,18 @@ async function verifyOtp (req, res) {
 }
 
 
-module.exports = { sendOtp, verifyOtp };
+//Get user details
+function getUserDetails (req, res) {
+    try {
+        res.status(200).json({
+            user: req.user
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error getiing user details.'
+        });
+    }
+}
+
+
+module.exports = { sendOtp, verifyOtp, getUserDetails };
