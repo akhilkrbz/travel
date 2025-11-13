@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const userController = require('../controllers/userController');
-const { sendOTPValidator, userRegisterValidator } = require('../validators/userValidator');
+const { sendOTPValidator, userRegisterValidator, followUnfollowValidator } = require('../validators/userValidator');
 const { validate } = require('../middlewares/validationMiddleware');
 const { verifyToken} = require('../middlewares/authMiddleware');
 
@@ -24,5 +24,8 @@ router.post('/logout', verifyToken, userController.logout);
 
 //Register User
 router.post('/register', userRegisterValidator, validate, userController.registerUser);
+
+//Follow / Unfollow User
+router.post('/follow_unfollow', verifyToken, followUnfollowValidator, validate, userController.followUnfollowUser);
 
 module.exports = router;

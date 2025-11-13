@@ -1,4 +1,5 @@
 const User = require('../models').User;
+const UserFollow = require('../models').UserFollow;
 const jwt = require('jsonwebtoken');
 const userHelper = require('../helpers/userHelper');
 
@@ -143,4 +144,49 @@ async function registerUser (req, res) {
     }
 }
 
-module.exports = { sendOtp, verifyOtp, getUserDetails, logout, registerUser };
+
+//Follow / Unfollow User
+async function followUnfollowUser (req, res) {
+    try {
+        const user_id = req.user.id;
+        const { follow_user_id } = req.body;
+        console.log("user_id", user_id);
+        console.log("follow_user_id", follow_user_id);
+
+        const check_user_follow = await UserFollow.findOne({where: {user_id: user_id, follow_user_id: follow_user_id}});
+        console.log("check_user_follow", check_user_follow);
+        
+        if(check_user_follow) {
+            await UserFollow.destroy({where: {user_id: user_id, follow_user_id: follow_user_id}});
+            var result = {message: 'User unfollowed successfully.'};
+        } else {
+            await UserFollow.create({
+                user_id: user_id,
+                follow_user_id: follow_user_id,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+            var result = {message: 'User followed successfully.'};
+        }
+
+        res.status(200).json({
+            message: result.message
+        });
+    }
+    catch (error) {
+        console.error('Follow/Unfollow Error:', error);
+        res.status(500).json({
+            message: 'Error in follow/unfollow user.',
+            error: error.message
+        });
+    }
+}
+
+module.exports = { 
+    sendOtp, 
+    verifyOtp, 
+    getUserDetails, 
+    logout, 
+    registerUser, 
+    followUnfollowUser 
+};
