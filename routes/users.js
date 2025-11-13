@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const userController = require('../controllers/userController');
-const { sendOTPValidator } = require('../validators/userValidator');
+const { sendOTPValidator, userRegisterValidator } = require('../validators/userValidator');
 const { validate } = require('../middlewares/validationMiddleware');
 const { verifyToken} = require('../middlewares/authMiddleware');
 
@@ -21,5 +21,8 @@ router.get('/details', verifyToken, userController.getUserDetails);
 
 //Logout
 router.post('/logout', verifyToken, userController.logout);
+
+//Register User
+router.post('/register', userRegisterValidator, validate, userController.registerUser);
 
 module.exports = router;

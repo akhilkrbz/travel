@@ -1,5 +1,6 @@
 const User = require('../models').User;
 const jwt = require('jsonwebtoken');
+const userHelper = require('../helpers/userHelper');
 
 //SEND OTP to Mobile Number
 function sendOtp (req, res) {
@@ -39,13 +40,7 @@ async function verifyOtp (req, res) {
                 console.log("User already exist.");
 
                 //Create JWT Token
-                const token = jwt.sign({
-                    id          : check_user.id,
-                    mobile_no   : check_user.mobile_no,
-                    email       : check_user.email,
-                    name        : check_user.name
-                },
-                process.env.JWT_SECRET, { expiresIn: '1h' });
+                const token = await userHelper.createJWT(check_user);
 
                 res.status(200).json({
                     message: "OTP Verified successfully.",
@@ -59,7 +54,7 @@ async function verifyOtp (req, res) {
         }
     } catch (error) {
         res.status(500).json({
-            message: 'Error sending OTP.'
+            message: 'Error in OTP verification.'
         });
     }
 
@@ -68,11 +63,20 @@ async function verifyOtp (req, res) {
 
 
 //Get user details
-function getUserDetails (req, res) {
+async function getUserDetails (req, res) {
     try {
-        res.status(200).json({
-            user: req.user
-        });
+        const user_id = req.user.id;
+        const user_details = await User.findByPk(user_id);
+        if(!user_details) {
+            return res.status(404).json({
+                message: 'User not found.'
+            });
+        } else {
+            res.status(200).json({
+                user: user_details
+            });
+        }
+        
     } catch (error) {
         res.status(500).json({
             message: 'Error getiing user details.'
@@ -96,4 +100,47 @@ function logout (req, res) {
 }
 
 
-module.exports = { sendOtp, verifyOtp, getUserDetails, logout };
+//registerUser
+async function registerUser (req, res) {
+    try {
+
+        const user_data = {
+            name: req.body.name,
+            email: req.body.email,
+            mobile_no: req.body.mobile_no,
+            login_id: req.body.username,
+            verified_account: 0,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        }
+
+        console.log("user_data", user_data);
+        
+
+        const create_user = await User.create(user_data);
+        console.log("create_user", create_user);
+        
+        if(!create_user) {
+            return res.status(400).json({
+                message: 'Error creating user.'
+            });
+        } else {
+
+            //Create JWT Token
+            const token = await userHelper.createJWT(create_user);
+
+            res.status(200).json({
+                message: "User registered successfully.",
+                token: token    
+            });
+
+        }
+        
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error with user register.'
+        });
+    }
+}
+
+module.exports = { sendOtp, verifyOtp, getUserDetails, logout, registerUser };
