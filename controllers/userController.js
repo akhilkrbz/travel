@@ -35,7 +35,9 @@ async function verifyOtp (req, res) {
             if(!check_user) {
                 res.status(200).json({
                     message: "OTP Verified successfully. Please register.",
-                    mobile_no: mobile_no
+                    mobile_no: mobile_no,
+                    is_new_user: true,
+                    token: null
                 });
             } else {
                 console.log("User already exist.");
@@ -45,7 +47,8 @@ async function verifyOtp (req, res) {
 
                 res.status(200).json({
                     message: "OTP Verified successfully.",
-                    token: token    
+                    is_new_user: false,
+                    token: token 
                 });
             }
         } else {
@@ -132,7 +135,8 @@ async function registerUser (req, res) {
 
             res.status(200).json({
                 message: "User registered successfully.",
-                token: token    
+                token: token,
+                user: create_user
             });
 
         }
